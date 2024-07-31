@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영어 단어 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 2px 2px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .questions-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .column {
+            flex: 1;
+            min-width: 200px;
+        }
+        .question {
+            margin: 10px 0;
+        }
+        .result {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #28a745;
+            border-radius: 5px;
+            color: #28a745;
+            text-align: center;
+        }
+        .incorrect {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>영어 단어 테스트</h1>
+    <form id="wordTestForm">
+        <div id="questionsContainer" class="questions-container"></div>
+        <button type="button" onclick="checkAnswers()">제출</button>
+    </form>
+    <div id="result" class="result"></div>
+</div>
+
+<script>
+    const words = [
+        { korean: "[형] 일정한, 불변의[명] 상수", english: "constant" },
+        { korean: "[동] 결정하다", english: "decide" },
+        { korean: "[동] 흡수하다, 열중시키다", english: "absorb" },
+        { korean: "[부] 결국", english: "eventually" },
+        { korean: "[명] 한계, 제한[동] 한정하다, 제한하다", english: "limit" },
+        { korean: "[동] 발표하다, 알리다", english: "announce" },
+        { korean: "[동] 강조하다", english: "emphasize" },
+        { korean: "[동] 동반하다, 수반하다", english: "accompany" },
+        { korean: "[명] 환경", english: "environment" },
+        { korean: "[전] ~에도 불구하고", english: "despite" },
+        { korean: "[명] 경우, 특별한 일", english: "occasion" },
+        { korean: "[동] 사라지다", english: "disappear" },
+        { korean: "[형] 정신의", english: "mental" },
+        { korean: "[형] 자랑스러워하는", english: "proud" },
+        { korean: "[형] 인지하는", english: "aware" },
+        { korean: "[명] 논란거리, 발행, 발행물", english: "issue" },
+        { korean: "[동] 치료하다, 낫게하다", english: "heal" },
+        { korean: "[명] 유전자", english: "gene" },
+        { korean: "[동] 따라가다, 따르다", english: "follow" },
+        { korean: "[부] 그러므로, 그 결과", english: "therefore" },
+        { korean: "[동] 고용하다, 쓰다", english: "employ" },
+        { korean: "[동] 사과하다", english: "apologize" },
+        { korean: "[동] 행동하다", english: "behave" },
+        { korean: "[명] 정치, 정치학", english: "politics" },
+        { korean: "[형] 자신 있는", english: "confident" },
+        { korean: "[동] 추정하다, 취하다", english: "assume" },
+        { korean: "[형] 사회의, 사교적인", english: "social" },
+        { korean: "[명] 세포", english: "cell" },
+        { korean: "[명] 물건, 목표[동] 반대하다", english: "object" },
+        { korean: "[동] 결론을 짓다, 끝내다", english: "conclude" },
+        { korean: "[명] (분류상의) 종", english: "species" },
+        { korean: "[부] 서서히, 점차", english: "gradually" },
+        { korean: "[명] 장치, 장비", english: "equipment" },
+        { korean: "[동] 교환하다", english: "exchange" },
+        { korean: "[명] 시야, 광경, 시력", english: "sight" },
+        { korean: "[동] 획득하다, 통용되다, 행해지다", english: "obtain" },
+        { korean: "[동] 일어나다, 발생하다", english: "occur" },
+        { korean: "[동] 시도하다[명] 시도", english: "attempt" },
+        { korean: "[동] 예언하다, 예측하다", english: "predict" },
+        { korean: "[동] (수량이) 증가하다[명] 증가, 이자", english: "increase" },
+    ];
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function generateQuestions() {
+        const questionsContainer = document.getElementById('questionsContainer');
+        shuffle(words);
+
+        const questionsPerColumn = 20;
+        const totalColumns = Math.ceil(words.length / questionsPerColumn);
+        let questionIndex = 1; // 전역 인덱스
+
+        for (let i = 0; i < totalColumns; i++) {
+            const columnDiv = document.createElement('div');
+            columnDiv.className = 'column';
+
+            const start = i * questionsPerColumn;
+            const end = Math.min(start + questionsPerColumn, words.length);
+
+            for (let j = start; j < end; j++) {
+                const word = words[j];
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                questionDiv.innerHTML = `
+                    <label>${questionIndex++}. ${word.korean}:</label>
+                    <input type="text" name="answer${j}" data-correct="${word.english}" />
+                `;
+                columnDiv.appendChild(questionDiv);
+            }
+
+            questionsContainer.appendChild(columnDiv);
+        }
+    }
+
+    function checkAnswers() {
+        const form = document.getElementById('wordTestForm');
+        const inputs = form.querySelectorAll('input');
+        let correctCount = 0;
+        inputs.forEach(input => {
+            const userAnswer = input.value.trim().toLowerCase();
+            const correctAnswer = input.getAttribute('data-correct').toLowerCase();
+            if (userAnswer === correctAnswer) {
+                correctCount++;
+                input.style.borderColor = '#28a745';
+            } else {
+                input.style.borderColor = '#dc3545';
+            }
+        });
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `정답 개수: ${correctCount} / ${words.length}`;
+        if (correctCount === words.length) {
+            resultDiv.classList.remove('incorrect');
+        } else {
+            resultDiv.classList.add('incorrect');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', generateQuestions);
+</script>
+
+</body>
+</html>
